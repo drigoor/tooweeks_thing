@@ -1,0 +1,34 @@
+expense_category:
+  Food: [Groceries, Restaurants, Coffee]
+  Transport: [Public transport, Fuel, Taxi]
+  Housing: [Rent, Utilities, Maintenance]
+  Entertainment: [Movies, Subscriptions, Games]
+  Health: [Doctor, Pharmacy, Gym]
+
+payee:
+  Supermarket: [Local supermarket, Discount supermarket]
+  Online: [Amazon, eBay]
+  Services: [Landlord, Utility company, Streaming service]
+
+payment_method:
+  Card: [Debit card, Credit card]
+  Digital: [PayPal, Apple Pay, Google Pay]
+  Cash: []
+
+payment_submethod:
+  Debit card: [Main account, Joint account]
+  Credit card: [Visa, Mastercard]
+
+recurrence:
+  - One-off
+  - Weekly
+  - Monthly
+  - Quarterly
+  - Yearly
+
+tag:
+  - Work
+  - Personal
+  - Travel
+  - Groceries
+  - Fun
