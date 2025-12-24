@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+String formatAmount(int amountCents) {
+  final euros = amountCents ~/ 100;
+  final cents = (amountCents % 100).toString().padLeft(2, '0');
+  return '€$euros.$cents';
+}
+
 // Generate timestamped filename: classifications_2025-12-24_01-25.yaml
 String timestampForFilename() {
   final now = DateTime.now();
