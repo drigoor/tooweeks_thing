@@ -45,14 +45,13 @@ class ClassificationController extends GetxController {
   }
 
   Future<String> exportToYaml() async {
-    final yamlContent = classificationsToYaml(classifications);
-
     String timestamp = timestampForFilename();
     final filename = 'classifications_$timestamp.yaml';
     
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/$filename');
-    await file.writeAsString(yamlContent);
+    final yaml = classificationsToYaml(classifications);
+    await file.writeAsString(yaml);
     
     return 'Exported ${classifications.length} items to $filename';
   }

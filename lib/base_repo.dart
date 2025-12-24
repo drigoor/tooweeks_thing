@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_helper.dart';
@@ -41,7 +42,9 @@ abstract class BaseRepository<T> {
     try {
       await batch.commit(noResult: true); // Commit all operations in batch
     } catch (e) {
-      print("Error inserting items into $tableName: $e");
+      if (kDebugMode) {
+        print("Error inserting items into $tableName: $e");
+      }
       rethrow; // Optional: rethrow the error if you want it to propagate
     }
   }
