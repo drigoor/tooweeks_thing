@@ -111,7 +111,7 @@ class _ClassificationDetailScreenState
       confirmText: 'Delete',
     );
     if (confirmed) {
-      final safeToDelete = await controller.safeDelete(
+      final safeToDelete = await controller.deleteClassification(
         widget.classification.id!,
       );
       if (!safeToDelete) {

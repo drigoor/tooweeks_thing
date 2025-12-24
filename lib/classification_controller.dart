@@ -13,16 +13,16 @@ import 'utils.dart';
 class ClassificationController extends GetxController {
   final ClassificationRepository repo = ClassificationRepository();
 
-  final RxList<Classification> classifications = <Classification>[].obs;
-  final RxBool isLoading = false.obs;
+  final classifications = <Classification>[].obs;
+  final isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadClassifications();
+    _loadClassifications();
   }
 
-  Future<void> loadClassifications() async {
+  Future<void> _loadClassifications() async {
     isLoading.value = true;
     try {
       final data = await repo.getAll();
@@ -32,7 +32,33 @@ class ClassificationController extends GetxController {
     }
   }
 
-  Map<String, dynamic> getStats() => _calculateStats();
+  Future<void> addClassification(Classification classification) async {
+    await repo.insert(classification);
+    classifications.add(classification);
+  }
+
+  Future<bool> updateClassification(Classification updated) async {
+    final count = await repo.update(updated, updated.id!);
+    if (count == -1) {
+      return false;
+    }
+    
+    final index = classifications.indexWhere((c) => c.id == updated.id);
+    if (index == -1) {
+      return false;
+    }
+    classifications[index] = updated;
+
+    return true;
+  }
+
+  Future<bool> deleteClassification(int id) async {
+    final success = await repo.safeDelete(id);
+    if (success) {
+      classifications.removeWhere((c) => c.id == id);
+    }
+    return success;
+  }
 
   Future<String> resetToBootstrap() async {
     final yamlString = await rootBundle.loadString('assets/bootstrap_data.yaml');
@@ -40,7 +66,7 @@ class ClassificationController extends GetxController {
 
     await repo.deleteAll();
     await repo.insertAll(bootstrapData);
-    await loadClassifications();
+    await _loadClassifications();
     return 'Database reset to bootstrap data (${bootstrapData.length} items)';
   }
 
@@ -56,21 +82,7 @@ class ClassificationController extends GetxController {
     return 'Exported ${classifications.length} items to $filename';
   }
 
-  Future<bool> safeDelete(int id) async {
-    final success = await repo.safeDelete(id);
-    if (success) {
-      classifications.removeWhere((c) => c.id == id);
-    }
-    return success;
-  }
-
-  Future<void> updateClassification(Classification updated) async {
-    await repo.update(updated, updated.id!);
-    final index = classifications.indexWhere((c) => c.id == updated.id);
-    if (index != -1) {
-      classifications[index] = updated;
-    }
-  }
+  Map<String, dynamic> getStats() => _calculateStats();
 
   Map<String, dynamic> _calculateStats() {
     final kinds = <String>{};
