@@ -1,7 +1,14 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'classification.dart';
 import 'classification_repo.dart';
+import 'classification_yaml.dart';
+import 'classification_yaml_writer.dart';
+import 'utils.dart';
 
 class ClassificationController extends GetxController {
   final ClassificationRepository repo = ClassificationRepository();
@@ -25,8 +32,30 @@ class ClassificationController extends GetxController {
     }
   }
 
-  @override
-  Future<void> refresh() => loadClassifications();
+  Map<String, dynamic> getStats() => _calculateStats();
+
+  Future<String> resetToBootstrap() async {
+    final yamlString = await rootBundle.loadString('assets/bootstrap_data.yaml');
+    final bootstrapData = parseClassificationsFromYaml(yamlString);
+
+    await repo.deleteAll();
+    await repo.insertAll(bootstrapData);
+    await loadClassifications();
+    return 'Database reset to bootstrap data (${bootstrapData.length} items)';
+  }
+
+  Future<String> exportToYaml() async {
+    final yamlContent = classificationsToYaml(classifications);
+
+    String timestamp = timestampForFilename();
+    final filename = 'classifications_$timestamp.yaml';
+    
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$filename');
+    await file.writeAsString(yamlContent);
+    
+    return 'Exported ${classifications.length} items to $filename';
+  }
 
   Future<bool> safeDelete(int id) async {
     final success = await repo.safeDelete(id);
@@ -38,10 +67,36 @@ class ClassificationController extends GetxController {
 
   Future<void> updateClassification(Classification updated) async {
     await repo.update(updated, updated.id!);
-    // Update the reactive list
     final index = classifications.indexWhere((c) => c.id == updated.id);
     if (index != -1) {
       classifications[index] = updated;
     }
+  }
+
+  Map<String, dynamic> _calculateStats() {
+    final kinds = <String>{};
+    final parents = <int>{};
+    int maxDepth = 0;
+
+    for (final c in classifications) {
+      kinds.add(c.kind);
+      if (c.parentId != null) parents.add(c.parentId!);
+
+      int depth = 0;
+      Classification? current = c;
+      while (current?.parentId != null) {
+        depth++;
+        current = classifications.firstWhereOrNull((p) => p.id == current!.parentId);
+        if (maxDepth < depth) maxDepth = depth;
+      }
+    }
+
+    return {
+      'total': classifications.length,
+      'kinds': kinds.toList()..sort(),
+      'parentCount': parents.length,
+      'orphanCount': classifications.length - parents.length,
+      'maxDepth': maxDepth,
+    };
   }
 }

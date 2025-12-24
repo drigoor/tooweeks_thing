@@ -118,6 +118,12 @@ abstract class BaseRepository<T> {
     return true;
   }
 
+  // Add to BaseRepository class:
+  Future<void> deleteAll() async {
+    final db = await _db;
+    await db.delete(tableName);
+  }
+
   // Check if the table is empty
   Future<bool> isEmpty() async => await _isTableEmpty(tableName);
 

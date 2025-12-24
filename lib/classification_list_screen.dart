@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'classification.dart';
 import 'classification_controller.dart';
 import 'classification_detail_screen.dart';
+import 'utils.dart';
 
 class ClassificationListScreen extends GetView<ClassificationController> {
   const ClassificationListScreen({super.key});
@@ -14,18 +15,31 @@ class ClassificationListScreen extends GetView<ClassificationController> {
       appBar: AppBar(
         title: const Text('Classifications'),
         actions: [
-          Obx(() => IconButton(  // Show loading spinner in button
-            icon: controller.isLoading.value
-                ? const SizedBox(
-                width: 20, height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2)
-            )
-                : const Icon(Icons.refresh),
-            onPressed: controller.refresh,
+          Obx(() => PopupMenuButton<String>(
+            enabled: !controller.isLoading.value,
+            onSelected: _handleAction,
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                  value: 'add',
+                  child: Row(children: [Icon(Icons.add), SizedBox(width: 8), Text('Add New')])
+              ),
+              const PopupMenuItem(
+                  value: 'reset',
+                  child: Row(children: [Icon(Icons.restart_alt), SizedBox(width: 8), Text('Reset DB')])
+              ),
+              const PopupMenuItem(
+                  value: 'export',
+                  child: Row(children: [Icon(Icons.download), SizedBox(width: 8), Text('Export')])
+              ),
+              const PopupMenuItem(
+                  value: 'stats',
+                  child: Row(children: [Icon(Icons.bar_chart), SizedBox(width: 8), Text('Stats')])
+              ),
+            ],
           )),
         ],
       ),
-      body: Obx(() => _buildBody()),  // ← Obx() around the body
+      body: Obx(() => _buildBody()),
     );
   }
 
@@ -57,7 +71,71 @@ class ClassificationListScreen extends GetView<ClassificationController> {
     );
   }
 
+  Future<void> _handleAction(String value) async {
+    switch (value) {
+      case 'add':
+        _openDetails(Classification(id: null, kind: '', name: '', parentId: null));
+        break;
+
+      case 'reset':
+        final confirmed = await confirmAction(
+          title: 'Reset Database?',
+          message: 'This will delete ALL classifications and reload the bootstrap data. This action cannot be undone.',
+          confirmText: 'Reset',
+        );
+        if (confirmed) {
+          final message = await controller.resetToBootstrap();
+          _showSuccess(message);
+        }
+        break;
+
+      case 'export':
+        final message = await controller.exportToYaml();
+        _showSuccess(message);
+        break;
+
+      case 'stats':
+        _showStatsDialog();
+        break;
+    }
+  }
+
+
   void _openDetails(Classification c) {
     Get.to(() => ClassificationDetailScreen(classification: c));
+  }
+
+  void _showStatsDialog() {
+    final stats = controller.getStats();
+    Get.dialog(
+      AlertDialog(
+        title: const Text('📊 Classification Stats'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Total: ${stats['total']} classifications'),
+              Text('Kinds: ${stats['kinds'].join(", ")}'),
+              Text('Parents: ${stats['parentCount']}'),
+              Text('Orphans: ${stats['orphanCount']}'),
+              Text('Deepest level: ${stats['maxDepth']}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('Close')),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    Get.snackbar(
+      'Success',
+      message,
+      snackPosition: SnackPosition.TOP,
+      duration: const Duration(seconds: 4),
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'classification.dart';
 import 'classification_controller.dart';
+import 'utils.dart';
 
 class ClassificationDetailScreen extends StatefulWidget {
   final Classification classification;
@@ -103,20 +104,30 @@ class _ClassificationDetailScreenState
   }
 
   Future<void> _delete(ClassificationController controller) async {
-    final success = await controller.safeDelete(widget.classification.id!);
-    if (!success) {
-      Get.dialog(
-        AlertDialog(
-          title: const Text('Cannot delete'),
-          content: const Text(
-            'This classification has subcategories and cannot be deleted. '
-            'Please delete or reassign them first.',
-          ),
-          actions: [TextButton(onPressed: Get.back, child: const Text('OK'))],
-        ),
+    // In detail screen _delete():
+    final confirmed = await confirmAction(
+      title: 'Delete Classification?',
+      message: 'This will permanently remove "${widget.classification.name}".',
+      confirmText: 'Delete',
+    );
+    if (confirmed) {
+      final safeToDelete = await controller.safeDelete(
+        widget.classification.id!,
       );
-      return;
+      if (!safeToDelete) {
+        Get.dialog(
+          AlertDialog(
+            title: const Text('Cannot delete'),
+            content: const Text(
+              'This classification has subcategories and cannot be deleted. '
+              'Please delete or reassign them first.',
+            ),
+            actions: [TextButton(onPressed: Get.back, child: const Text('OK'))],
+          ),
+        );
+        return;
+      }
+      Get.back();
     }
-    Get.back();
   }
 }
