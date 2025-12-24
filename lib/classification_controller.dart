@@ -19,10 +19,10 @@ class ClassificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadClassifications();
+    loadClassifications();
   }
 
-  Future<void> _loadClassifications() async {
+  Future<void> loadClassifications() async {
     isLoading.value = true;
     try {
       final data = await repo.getAll();
@@ -66,7 +66,7 @@ class ClassificationController extends GetxController {
 
     await repo.deleteAll();
     await repo.insertAll(bootstrapData);
-    await _loadClassifications();
+    await loadClassifications();
     return 'Database reset to bootstrap data (${bootstrapData.length} items)';
   }
 
