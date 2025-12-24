@@ -12,10 +12,10 @@ class ExpenseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadExpenses();
+    loadExpenses();
   }
 
-  Future<void> _loadExpenses() async {
+  Future<void> loadExpenses() async {
     isLoading.value = true;
     try {
       final data = await repo.getAll();
