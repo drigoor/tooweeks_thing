@@ -59,7 +59,7 @@ class DatabaseHelper {
         category_id INTEGER NOT NULL,
         subcategory_id INTEGER,
         payee_id INTEGER,
-        amount_cents INTEGER NOT NULL,
+        amount INTEGER NOT NULL,
         payment_method_id INTEGER,
         payment_submethod_id INTEGER,
         recurrence_id INTEGER,
