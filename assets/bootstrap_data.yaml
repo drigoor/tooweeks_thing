@@ -1,4 +1,4 @@
-category:
+expense_category:
   food: [grocery, restaurant]
   transport: [pass]
   bill: [power, gas, water, internet, phone]
