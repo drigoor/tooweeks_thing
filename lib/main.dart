@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Expenses Things',
+      title: 'Expenses Thing',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
       home: const HomeScreen(),
     );
