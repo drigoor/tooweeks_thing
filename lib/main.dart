@@ -5,9 +5,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:get/get.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'home_screen.dart';
 import 'classification_controller.dart';
 import 'classification_repo.dart';
+import 'classification_tree_screen.dart';
 import 'classification_yaml.dart';
 import 'database_helper.dart';
 import 'expense_controller.dart';
@@ -51,5 +51,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.teal),
       home: const HomeScreen(),
     );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClassificationTreeScreen();
   }
 }

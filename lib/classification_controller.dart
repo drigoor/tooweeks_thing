@@ -79,7 +79,7 @@ class ClassificationController extends GetxController {
     final yaml = classificationsToYaml(classifications);
     await file.writeAsString(yaml);
     
-    return 'Exported ${classifications.length} items to $filename';
+    return 'Exported ${classifications.length} items to \'$filename\'';
   }
 
   Map<String, dynamic> getStats() => _calculateStats();
